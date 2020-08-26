@@ -1,11 +1,12 @@
 import telebot
 import config
+import secretdata
 import similarity
 import inspect
 import asyncio
 import random
 
-bot = telebot.TeleBot(config.token)
+bot = telebot.TeleBot(secretdata.token)
 
 savedata = {}
 
