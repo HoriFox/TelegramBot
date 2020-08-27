@@ -4,7 +4,6 @@ import secretdata
 import similarity
 import inspect
 import asyncio
-import random
 import requests
 
 bot = telebot.TeleBot(secretdata.token)
@@ -71,6 +70,8 @@ def test_message(message):
 			asyncio.set_event_loop(loop)
 			loop.run_until_complete(min_url_request(message))
 	else:
+		# Воспользуемся простым коэффициентом Танимото, он плохо подходит для маленьких слов, поэтому
+		# для них просто сделаем жёсткое сравнение
 		if similarity.tanimoto(message.text.lower(), 'список сокращённых') >= 0.70:
 			hist_url_message(message)
 		elif similarity.tanimoto(message.text.lower(), 'сократить ссылку') >= 0.70:
