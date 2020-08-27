@@ -65,7 +65,7 @@ def test_message(message):
 		if message.text.lower() == 'отмена':
 			bot.send_message(message.chat.id, 'Окей', reply_markup=keyboard_main)
 		else:
-			bot.send_message(message.chat.id, 'Один момент, сейчас отправлю', reply_markup=keyboard_main)
+			bot.send_message(message.chat.id, 'Один момент, сейчас обработаю', reply_markup=keyboard_main)
 			# выполнение функции запроса сокращённой ссылки и ответа асинхронно
 			loop = asyncio.new_event_loop()
 			asyncio.set_event_loop(loop)
@@ -82,12 +82,14 @@ def test_message(message):
 
 
 async def min_url_request(message):
-
 	create_url = 'https://rel.ink/api/links/'
 	url_to_reduce = {'url': message.text}
 	create_answer = requests.post(create_url, data = url_to_reduce)
+	# Обработка ошибки
+	if create_answer.json()["url"][0] == 'Enter a valid URL.':
+		bot.send_message(message.chat.id, 'Введите, пожалуйста, корректный url')
+		return
 	shortened_url  = 'https://rel.ink/' + create_answer.json()["hashid"]
-
 	key = str(message.chat.id) + 'listurl'
 	if key not in savedata:
 		savedata[key] = []
