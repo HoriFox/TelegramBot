@@ -5,6 +5,7 @@ import similarity
 import inspect
 import asyncio
 import random
+import requests
 
 bot = telebot.TeleBot(secretdata.token)
 
@@ -51,7 +52,7 @@ def hist_url_message(message):
 		list_last_url = '\n'.join(savedata[str(message.chat.id) + 'listurl'])
 	else:
 		list_last_url = 'Список пуст'
-	bot.send_message(message.chat.id, list_last_url)
+	bot.send_message(message.chat.id, list_last_url, disable_web_page_preview = True)
 	bot.send_sticker(message.chat.id, config.sticker_bang)
 
 
@@ -82,17 +83,20 @@ def test_message(message):
 
 async def min_url_request(message):
 
-	out_url = 'Тест' + str(random.random())
+	create_url = 'https://rel.ink/api/links/'
+	url_to_reduce = {'url': message.text}
+	create_answer = requests.post(create_url, data = url_to_reduce)
+	shortened_url  = 'https://rel.ink/' + create_answer.json()["hashid"]
 
 	key = str(message.chat.id) + 'listurl'
 	if key not in savedata:
 		savedata[key] = []
-	savedata[key].append(out_url)
+	savedata[key].append(shortened_url)
 	# Удаляем лишние записи из начала
 	if len(savedata[key]) > config.max_len_url_list:
 		savedata[key].pop(0)
-	out_message = 'Ссылка на сокращение [' + message.text + ']\nСокращённая ссылка: [' + out_url + ']'
-	bot.send_message(message.chat.id, out_message)
+	out_message = 'Ваша сокращённый url: ' + shortened_url + '\nПолный url: ' + message.text
+	bot.send_message(message.chat.id, out_message, disable_web_page_preview = True)
 
 
 if __name__ == '__main__':
