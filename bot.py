@@ -41,7 +41,8 @@ def help_message(message):
 def min_url_message(message):
 	# Создание триггера ожидания для конкретного чата
 	savedata[str(message.chat.id) + 'inputurl'] = 'wait'
-	bot.send_message(message.chat.id, 'Введи ссылку для сокращения', reply_markup=keyboard_cancel)
+	bot.send_message(message.chat.id, 'Введи ссылку для сокращения',
+					 reply_markup=keyboard_cancel)
 
 
 @bot.message_handler(commands=['histurl'])
@@ -51,7 +52,8 @@ def hist_url_message(message):
 		list_last_url = '\n'.join(savedata[str(message.chat.id) + 'listurl'])
 	else:
 		list_last_url = 'Список пуст'
-	bot.send_message(message.chat.id, list_last_url, disable_web_page_preview = True)
+	bot.send_message(message.chat.id, list_last_url,
+					 disable_web_page_preview = True)
 	bot.send_sticker(message.chat.id, config.sticker_bang)
 
 
@@ -64,22 +66,26 @@ def test_message(message):
 		if message.text.lower() == 'отмена':
 			bot.send_message(message.chat.id, 'Окей', reply_markup=keyboard_main)
 		else:
-			bot.send_message(message.chat.id, 'Один момент, сейчас обработаю', reply_markup=keyboard_main)
+			bot.send_message(message.chat.id, 'Один момент, сейчас обработаю',
+							 reply_markup=keyboard_main)
 			# выполнение функции запроса сокращённой ссылки и ответа асинхронно
 			loop = asyncio.new_event_loop()
 			asyncio.set_event_loop(loop)
 			loop.run_until_complete(min_url_request(message))
 	else:
-		# Воспользуемся простым коэффициентом Танимото, он плохо подходит для маленьких слов, поэтому
+		# Воспользуемся простым коэффициентом Танимото,
+		# он плохо подходит для маленьких слов, поэтому
 		# для них просто сделаем жёсткое сравнение
 		if similarity.tanimoto(message.text.lower(), 'список сокращённых') >= 0.70:
 			hist_url_message(message)
 		elif similarity.tanimoto(message.text.lower(), 'сократить ссылку') >= 0.70:
 			min_url_message(message)
-		elif message.text.lower() in ('спасибо','спс','спасиб') or message.text.lower() in ('привет','даров','хэлло'):
+		elif message.text.lower() in ('спасибо', 'спс', 'спасиб')
+		  or message.text.lower() in ('привет', 'даров', 'хэлло'):
 			bot.send_sticker(message.chat.id, config.sticker_thank)
 		else:
-			bot.send_message(message.chat.id, 'Я не знаю как ответить', reply_markup=keyboard_main)
+			bot.send_message(message.chat.id, 'Я не знаю как ответить',
+							 reply_markup=keyboard_main)
 
 
 async def min_url_request(message):
@@ -90,7 +96,7 @@ async def min_url_request(message):
 	if create_answer.json()["url"][0] == 'Enter a valid URL.':
 		bot.send_message(message.chat.id, 'Введите, пожалуйста, корректный url')
 		return
-	shortened_url  = 'https://rel.ink/' + create_answer.json()["hashid"]
+	shortened_url = 'https://rel.ink/' + create_answer.json()["hashid"]
 	key = str(message.chat.id) + 'listurl'
 	if key not in savedata:
 		savedata[key] = []
@@ -98,9 +104,11 @@ async def min_url_request(message):
 	# Удаляем лишние записи из начала
 	if len(savedata[key]) > config.max_len_url_list:
 		savedata[key].pop(0)
-	out_message = 'Ваша сокращённый url: ' + shortened_url + '\nПолный url: ' + message.text
-	bot.send_message(message.chat.id, out_message, disable_web_page_preview = True)
+	out_message = 'Ваша сокращённый url: ' + shortened_url +
+				  '\nПолный url: ' + message.text
+	bot.send_message(message.chat.id, out_message,
+					 disable_web_page_preview = True)
 
 
 if __name__ == '__main__':
-    bot.infinity_polling()
+	bot.infinity_polling()
